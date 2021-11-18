@@ -12,7 +12,7 @@ Game::Game (char* title, Uint16 width, Uint16 height) {
         SDL_Quit();
         exit(-1);
     }
-    this->Renderer = SDL_CreateRenderer(Window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    this->Renderer = SDL_CreateRenderer(Window, -1, SDL_RENDERER_ACCELERATED);
     if(this->Renderer == NULL){
         THROW_SDL_ERROR;
         SDL_DestroyWindow(this->Window);
@@ -26,6 +26,7 @@ void Game::Run(){
     this->_start();
     while (!this->_shouldQuit)
     {
+        Time::CalculateDeltaTime();
         SDL_PollEvent(&this->_eventHandler);
         this->_handleEvents(this->_eventHandler);
         this->_update();
@@ -44,13 +45,12 @@ void Game::_quit(){
 void Game::_start(){
     this->t_bg = LoadTexture(this->Renderer,"blue-sky.bmp");
     this->square = new GameObject(LoadTexture(this->Renderer,"metal-texture.bmp"));
-    this->square->Transform.h = 10;
-    this->square->Transform.w = 10;
+    this->square->Transform.h = 50;
+    this->square->Transform.w = 60;
 }
 
 // Handles events...
 void Game::_handleEvents(SDL_Event e){
-    this->Time++;
     SDL_GetWindowSize(this->Window, &this->sW, &this->sH);
     switch (e.type){
         case SDL_QUIT:
@@ -69,16 +69,16 @@ void Game::_handleEvents(SDL_Event e){
 void Game::_handleKeyDown(SDL_Keycode keycode){
     switch(keycode){
         case SDLK_UP:
-            this->square->Transform.y-=this->deltaTime;
+            this->square->Transform.y-=50*Time::DeltaTime();
             break;
         case SDLK_DOWN:
-            this->square->Transform.y+=this->deltaTime;
+            this->square->Transform.y+=50*Time::DeltaTime();
             break;
         case SDLK_RIGHT:
-            this->square->Transform.x+=this->deltaTime;
+            this->square->Transform.x+=50*Time::DeltaTime();
             break;
         case SDLK_LEFT:
-            this->square->Transform.x-=this->deltaTime;
+            this->square->Transform.x-=50*Time::DeltaTime();
             break;
     }
 }
@@ -90,8 +90,7 @@ void Game::_handleKeyUp(SDL_Keycode keycode){
 
 // This runs every frame
 void Game::_update(){
-    this->currentTime = this->Time;
-    this->deltaTime = (this->currentTime-this->lastTime);
+    // You should probably keep these three lines.
     SDL_RenderClear(this->Renderer);
 
     if(!once){
@@ -100,11 +99,9 @@ void Game::_update(){
         once = true;
     }
     
-    SDL_RenderCopy(this->Renderer, 
-    this->t_bg, NULL,NULL);
-    
-    SDL_RenderCopy(this->Renderer, this->square->Texture, this->square->TextureClip, &this->square->Transform);
+    SDL_RenderCopy(this->Renderer, this->t_bg, NULL,NULL);
+    this->square->Draw(this->Renderer);
 
+    // Keep this as well.
     SDL_RenderPresent(this->Renderer);
-    this->lastTime = this->currentTime;
 }

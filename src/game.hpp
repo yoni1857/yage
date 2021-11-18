@@ -4,8 +4,7 @@
 #include <SDL2/SDL.h>
 #include <windows.h>
 #include <stdlib.h>
-#include <string>
-#include <map>
+#include <algorithm>
 #include "gameobject.hpp"
 #include "tools/tools.hpp"
 
@@ -24,11 +23,6 @@ class Game {
         bool once = false;
 
         int sW; int sH;
-
-        float deltaTime;
-        int lastTime;
-        int currentTime;
-        int Time;
 
 
     // Methods
